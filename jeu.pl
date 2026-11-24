@@ -64,8 +64,6 @@ displayBoard :-
 %.......................................
 % move
 %.......................................
-% applies a move in a column
-%
 
 playMoveInColumn(['?'|T],[Player|T],Player).
 playMoveInColumn([H|T1], [H|T2],Player) :- 
