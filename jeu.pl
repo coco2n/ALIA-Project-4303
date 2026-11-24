@@ -15,12 +15,19 @@
 %%%     USEFUL PREDICATES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+% Lit une ligne complète sans point final et la convertit en nombre ou en atome
+read_input(Val) :-
+    read_line_to_string(user_input, Str),
+    normalize_space(string(CleanStr), Str),
+    (   number_string(Val, CleanStr)
+    ->  true
+    ;   atom_string(Val, CleanStr)
+    ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%     FACTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+:- dynamic player/2.
 :- dynamic board/1.
 
 changePlayer(x, o).
@@ -147,38 +154,117 @@ ia(Board, Move, Player) :-
 %%%     MAIN PROGRAM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+run :-
+    hello,
+    play(x),
+    goodbye.
+
+hello :-
+    retractall(board(_)),
+    retractall(player(_, _)),
+    asserta(board([ ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'],
+                    ['?','?','?','?','?','?'] ])),
+    nl, writeln('=== PUISSANCE 4 ==='),
+    read_players.
+
+read_players :-
+    nl, write('Nombre de joueurs humains (0, 1 ou 2) ? '),
+    read_input(N),
+    set_players(N).
+
+set_players(0) :-
+    asserta(player(x, computer)),
+    asserta(player(o, computer)), !.
+
+set_players(1) :-
+    nl, write('Voulez-vous jouer x ou o (x commence) ? '),
+    read_input(M),
+    human_playing(M), !.
+set_players(2) :-
+    asserta(player(x, human)),
+    asserta(player(o, human)), !.
+set_players(_) :-
+    writeln('Entree invalide. Tapez 0., 1. ou 2.'),
+    read_players.
+
+human_playing(M) :-
+    (M == 'x' ; M == 'X'),
+    asserta(player(x, human)),
+    asserta(player(o, computer)), !.
+human_playing(M) :-
+    (M == 'o' ; M == 'O'),
+    asserta(player(x, computer)),
+    asserta(player(o, human)), !.
+human_playing(_) :-
+    writeln('Entree invalide. Tapez x. ou o.'),
+    set_players(1).
+
+goodbye :-
+    retractall(board(_)),
+    retractall(player(_, _)),
+    read_play_again(V), !,
+    (V == 'Y' ; V == 'y'), !,
+    run.
+goodbye. % Termine proprement si l'utilisateur répond N
+
+read_play_again(V) :-
+    nl, write('Rejouer (y/n) ? '),
+    read_input(V),
+    (V == 'y' ; V == 'Y' ; V == 'n' ; V == 'N'), !.
+read_play_again(V) :-
+    writeln('Veuillez entrer y. ou n.'),
+    read_play_again(V).
+
+chooseMove(human, Board, Move, Player) :-
+    repeat,
+    write('Joueur '), write(Player), write(', choisissez une colonne (1-7) : '),
+    read_input(Move),
+    integer(Move),
+    validMove(Board, Move), !.
+
+chooseMove(computer, Board, Move, Player) :-
+    writeln('L\'ordinateur reflechit...'),
+    ia(Board, Move, Player),
+    write('L\'ordinateur joue en colonne '), writeln(Move).
+
 play(Player) :-
     board(Board),
     displayBoard,
-    write('New turn for: '), writeln(Player),
-    ia(Board, Move, Player),
+    nl, write('Tour de : '), writeln(Player),
+    player(Player, Type),
+    chooseMove(Type, Board, Move, Player),
     playMove(Board, Move, NewBoard, Player),
     applyIt(Board, NewBoard),
     (   gagne(NewBoard, Move, Player)
     ->  displayBoard,
-        write(Player), writeln(' wins!'),
+        write(Player), writeln(' gagne !'),
         !
     ;   gameOver(NewBoard)
     ->  displayBoard,
-        writeln('Draw!'),
+        writeln('Match nul !'),
         !
     ;   changePlayer(Player, NextPlayer),
         play(NextPlayer)
-    )
-    .
+    ).
 
 init :-
     retractall(board(_)),
-    assert(board(  [['?','?','?','?','?','?'],
+    retractall(player(_, _)),
+    asserta(player(x, computer)),
+    asserta(player(o, computer)),
+    asserta(board([ ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
-                    ['?','?','?','?','?','?']   
-                    ])),
+                    ['?','?','?','?','?','?'] ])),
     play(x).
-    .
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
