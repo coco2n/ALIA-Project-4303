@@ -140,15 +140,44 @@ gagne(Board, Move, Player) :- fail. % to complete
 %%% put every AI model here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% --- useful predicat for IA models ---
+
+winningMove(Board, Move, Player) :-
+    Move > 1,
+    Move < 8,
+    validMove(Board, Move),
+    playMove(Board, Move, NewBoard, Player),
+    gagne(NewBoard, Move, Player)
+    .
+
+% ---
+
+% --- IA MODELS ---
+
 randomIA(Board, Move, Player) :-
     repeat,
     random_between(1, 7, Move),
-    validMove(Board, Move).
+    validMove(Board, Move)
+    .
+
+
+wAndB(Board, Move, Player) :-
+    (   winningMove(Board, tempMove, Player)
+    ->  Move = tempMove,
+        !
+    ;   changePlayer(Player, OtherPlayer),
+        (   winningMove(Board, tempMove, OtherPlayer)
+        ->  Move = tempMove,
+            !  
+        ;   randomIA(Board, Move, Player),
+            !
+        )
+    )
     .
 
 % to change ia model, just change the predicate called by ia 
 ia(Board, Move, Player) :-
-    randomIA(Board, Move, Player)
+    wAndB(Board, Move, Player)
     .
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%     MAIN PROGRAM
