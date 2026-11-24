@@ -60,6 +60,17 @@ displayBoard :-
     displayLine(1,[C1,C2,C3,C4,C5,C6,C7])
     .
 
+%.......................................
+% column
+%.......................................
+% The mark in a column(N) corresponds to an item in a list, as follows:
+column([M,_,_,_,_,_],1,M).
+column([_,M,_,_,_,_],2,M).
+column([_,_,M,_,_,_],3,M).
+column([_,_,_,M,_,_],4,M).
+column([_,_,_,_,M,_],5,M).
+column([_,_,_,_,_,M],6,M).
+
 
 %.......................................
 % move
