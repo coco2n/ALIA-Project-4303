@@ -115,9 +115,17 @@ validMove([_|T], Move) :-
 % game_over
 %.......................................
 
-gameOver(Board) :- False.
+gameOver(Board) :- 
+    \+ validMove(Board, 1),
+    \+ validMove(Board, 2),
+    \+ validMove(Board, 3),
+    \+ validMove(Board, 4),
+    \+ validMove(Board, 5),
+    \+ validMove(Board, 6),
+    \+ validMove(Board, 7)
+    .
 
-gagne(Board, Player) :- False.
+gagne(Board, Move, Player) :- fail. % to complete
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,6 +139,10 @@ randomIA(Board, Move, Player) :-
     validMove(Board, Move).
     .
 
+% to change ia model, just change the predicate called by ia 
+ia(Board, Move, Player) :-
+    randomIA(Board, Move, Player)
+    .
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%     MAIN PROGRAM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,7 +154,7 @@ play(Player) :-
     ia(Board, Move, Player),
     playMove(Board, Move, NewBoard, Player),
     applyIt(Board, NewBoard),
-    (   gagne(NewBoard, Player)
+    (   gagne(NewBoard, Move, Player)
     ->  displayBoard,
         write(Player), writeln(' wins!'),
         !
