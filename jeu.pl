@@ -28,6 +28,9 @@ len([_|Y],R) :- len(Y,A),R is A+1.
 changePlayer(x, o).
 changePlayer(o, x).
 
+player_mark(1, 'o'). % Jaune
+player_mark(2, 'x'). % Rouge
+
 %.......................................
 % display
 %.......................................
@@ -94,7 +97,33 @@ applyIt(Board, NewBoard) :-
 
 gameOver(Board) :- False.
 
-gagne(Board, Player) :- False.
+
+
+
+
+
+% Pour gagner, la case regardée doit être de la couleur du couleur
+% 7 directions à tester à chaque coup joué
+gagne(Board, P, C, H) :-
+	nth0(C, Board, X),
+	% nth0(H, X, ),
+	player_mark(P,M),	
+	vertical(X, H, M, 4).
+	
+
+
+vertical(C, H, M, 1) :-
+   	H >= 0,
+    nth0(H,C,M).
+
+
+vertical(C, H, M, N) :- 
+   	N1 is N-1,
+	H1 is H-1,
+    nth0(H,C,M),
+	H >= 0,
+    N > 1,
+	vertical(C, H1, M, N1).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
