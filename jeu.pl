@@ -15,8 +15,6 @@
 %%%     USEFUL PREDICATES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-len([],0).
-len([_|Y],R) :- len(Y,A),R is A+1.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,7 +49,6 @@ displayLine(X,[[_|T1],[_|T2],[_|T3],[_|T4],[_|T5],[_|T6],[_|T7]]) :-
 displayBoard :-
     board([C1,C2,C3,C4,C5,C6,C7]),
     writeln('Current Board:'),
-    displayLine(7,[C1,C2,C3,C4,C5,C6,C7]), 
     displayLine(6,[C1,C2,C3,C4,C5,C6,C7]), 
     displayLine(5,[C1,C2,C3,C4,C5,C6,C7]), 
     displayLine(4,[C1,C2,C3,C4,C5,C6,C7]), 
@@ -94,10 +91,25 @@ playMove([C|T], N, [C|NewT], Player):-
     .
 
 applyIt(Board, NewBoard) :-
-    retract(board(Board)),
+    retractall(board(_)),
     assert(board(NewBoard))
     .
 
+validMoveInColumn(['?'|_]).
+validMoveInColumn([H|T]) :-
+    H \= '?',
+     validMoveInColumn(T)
+    .
+
+validMove([C|_], 1) :-
+    validMoveInColumn(C)
+    .
+validMove([_|T], Move) :-
+    Move > 1,
+    Move < 8,
+    NextMove is Move - 1,
+    validMove(T, NextMove)
+    .
 
 %.......................................
 % game_over
@@ -107,6 +119,17 @@ gameOver(Board) :- False.
 
 gagne(Board, Player) :- False.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%     IA MODULE FOR CONNECT 4
+%%% put every AI model here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+randomIA(Board, Move, Player) :-
+    repeat,
+    random_between(1, 7, Move),
+    validMove(Board, Move).
+    .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%     MAIN PROGRAM
@@ -133,6 +156,7 @@ play(Player) :-
     .
 
 init :-
+    retractall(board(_)),
     assert(board(  [['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?'],
@@ -141,15 +165,10 @@ init :-
                     ['?','?','?','?','?','?'],
                     ['?','?','?','?','?','?']   
                     ])),
-    displayBoard,
-    playMove([C1,C2,C3,C4,C5,C6,C7], 3, NewBoard, x),
-    playMove(NewBoard, 4, NewBoard2, o),
-    playMove(NewBoard2, 3, NewBoard3, x),
-    applyIt([C1,C2,C3,C4,C5,C6,C7], NewBoard3),
-    displayBoard
+    play(x).
     .
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% End of program
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
